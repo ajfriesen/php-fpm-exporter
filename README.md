@@ -3,7 +3,7 @@ php-fpm-exporter
 
 Export php-fpm metrics in [Prometheus](https://prometheus.io/) format.
 
-See [Releases](https://github.com/bakins/php-fpm-exporter/releases) for pre-built binaries.
+See [Releases](https://github.com/kublr/php-fpm-exporter/releases) for pre-built binaries.
 
 Also availible on Docker Hub [bakins/php-fpm-exporter](https://hub.docker.com/r/bakins/php-fpm-exporter/)
 
@@ -15,9 +15,9 @@ Requires [Go](https://golang.org/doc/install). Tested with Go 1.8+.
 Clone this repo into your `GOPATH` (`$HOME/go` by default) and run build:
 
 ```
-mkdir -p $HOME/go/src/github.com/bakins
-cd $HOME/go/src/github.com/bakins
-git clone https://github.com/bakins/php-fpm-exporter
+mkdir -p $HOME/go/src/github.com/kublr
+cd $HOME/go/src/github.com/kublr
+git clone https://github.com/kublr/php-fpm-exporter
 cd php-fpm-exporter
 ./script/build
 ```
