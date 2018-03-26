@@ -23,6 +23,7 @@ type Exporter struct {
 	addr         string
 	endpoint     *url.URL
 	fcgiEndpoint *url.URL
+	fcgiTimeout  time.Duration
 	logger       *zap.Logger
 }
 
@@ -102,6 +103,13 @@ func SetFastcgi(rawurl string) func(*Exporter) error {
 			return errors.Wrap(err, "failed to parse url")
 		}
 		e.fcgiEndpoint = u
+		return nil
+	}
+}
+
+func SetFastcgiTimeout(timeout time.Duration) func(*Exporter) error {
+	return func(e *Exporter) error {
+		e.fcgiTimeout = timeout
 		return nil
 	}
 }

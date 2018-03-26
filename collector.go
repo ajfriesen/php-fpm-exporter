@@ -2,10 +2,12 @@ package exporter
 
 import (
 	"io/ioutil"
+	"net"
 	"net/http"
 	"net/url"
 	"regexp"
 	"strconv"
+	"time"
 
 	"github.com/pkg/errors"
 	"github.com/prometheus/client_golang/prometheus"
@@ -106,7 +108,7 @@ func (c *collector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- c.oldScrapeFailures
 }
 
-func getDataFastcgi(u *url.URL) ([]byte, error) {
+func getDataFastcgi(u *url.URL, timeout time.Duration) ([]byte, error) {
 	path := u.Path
 	if path == "" {
 		path = "/status"
@@ -117,7 +119,7 @@ func getDataFastcgi(u *url.URL) ([]byte, error) {
 		"SCRIPT_NAME":     path,
 	}
 
-	fcgi, err := fcgiclient.Dial(u.Scheme, u.Host)
+	fcgi, err := fcgiclient.DialTimeout(u.Scheme, u.Host, timeout)
 	if err != nil {
 		return nil, errors.Wrap(err, "fastcgi dial failed")
 	}
@@ -181,7 +183,7 @@ func (c *collector) Collect(ch chan<- prometheus.Metric) {
 	)
 
 	if c.exporter.fcgiEndpoint != nil {
-		body, err = getDataFastcgi(c.exporter.fcgiEndpoint)
+		body, err = getDataFastcgi(c.exporter.fcgiEndpoint, c.exporter.fcgiTimeout)
 	} else {
 		body, err = getDataHTTP(c.exporter.endpoint)
 	}
@@ -202,6 +204,16 @@ func (c *collector) Collect(ch chan<- prometheus.Metric) {
 		prometheus.CounterValue,
 		float64(c.failureCount),
 	)
+
+	// dial timeout
+	if err, ok := err.(net.Error); ok && err.Timeout() {
+		ch <- prometheus.MustNewConstMetric(
+			c.oldActiveProcesses,
+			prometheus.GaugeValue,
+			1000.0,
+			"active",
+		)
+	}
 
 	if up == 0.0 {
 		return

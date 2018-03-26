@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"time"
 
 	exporter "github.com/kublr/php-fpm-exporter"
 	"github.com/spf13/cobra"
@@ -13,6 +14,7 @@ var (
 	addr         *string
 	endpoint     *string
 	fcgiEndpoint *string
+	fcgiTimeout  *time.Duration
 )
 
 func serverCmd(cmd *cobra.Command, args []string) {
@@ -26,6 +28,7 @@ func serverCmd(cmd *cobra.Command, args []string) {
 		exporter.SetAddress(*addr),
 		exporter.SetEndpoint(*endpoint),
 		exporter.SetFastcgi(*fcgiEndpoint),
+		exporter.SetFastcgiTimeout(*fcgiTimeout),
 		exporter.SetLogger(logger),
 	)
 
@@ -48,6 +51,7 @@ func main() {
 	addr = rootCmd.PersistentFlags().StringP("addr", "", "127.0.0.1:8080", "listen address for metrics handler")
 	endpoint = rootCmd.PersistentFlags().StringP("endpoint", "", "http://127.0.0.1:9000/status", "url for php-fpm status")
 	fcgiEndpoint = rootCmd.PersistentFlags().String("fastcgi", "", "fastcgi url. If this is set, fastcgi will be used instead of HTTP")
+	fcgiTimeout = rootCmd.PersistentFlags().Duration("fcgi-timeout", 3*time.Second, "fastcgi dial timeout")
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Printf("root command failed: %v", err)
